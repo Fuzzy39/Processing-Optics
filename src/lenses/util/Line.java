@@ -10,7 +10,7 @@ public class Line
 
 	private float A; // x coef.
 	private float B; // y coef.
-	private float C;
+	private float C; // Ax+By+C = 0
 	// 
 
 	public Line(PVector p1, PVector p2)
@@ -20,6 +20,17 @@ public class Line
 		A= -rise;
 		B= run;
 		C= p1.y*run - p1.x*rise;
+	}
+	
+	
+	public Line(PVector point, Angle ang)
+	{
+		float run = (float) Math.cos(ang.getRadians());
+		float rise = (float) Math.sin(ang.getRadians());
+	
+		A = -rise;
+		B = run;	
+		C = run*point.y - rise*point.x;
 	}
 
 	public Line(PVector point, float slope)
@@ -33,6 +44,59 @@ public class Line
 	public boolean containsPoint(PVector point)
 	{
 		return Util.floatsWithin(point.x*A+point.y*B, C, .01f);
+	}
+	
+	public PVector PointFromPoint(PVector point, float distance)
+	{
+		if(!containsPoint(point))
+		{
+			PVector inter = new Line(point, getAngle().add(Angle.fromDegrees(90))).intersect(this);
+			throw new IllegalArgumentException("Point not on line. Dist: "+inter.dist(point));
+		}
+		
+		float x;
+		float y;
+		
+		if(B == 0)
+		{
+			x = -C/A;
+			float g = distance*distance - point.x*point.x - (2*point.x*C)/A;
+			g+= ((-1*C*C)/(A*A))+2*point.y*point.y;
+			float squart = (float)Math.sqrt(g);
+			squart *= distance>=0? 1: -1;
+			y = point.y*point.y + squart;
+		}
+		else
+		{
+			float A2 = (1 + ((A*A)/(B*B)));
+			float B2 = ((2*C*A)/(B*B))+(2*point.y*A/B)-2*point.x;
+			float q = point.x*point.x+point.y*point.y -distance*distance;
+			float C2 = q + (C*C)/(B*B) + (2*point.y*C)/B;
+			float squart = (float)Math.sqrt(B2*B2 - (4*A2*C2));
+			squart *= distance>=0? 1: -1;
+			x = (-1*B2 + squart)/(2*A2);
+			y = (-1*C - A*x)/B;
+			
+		}
+		
+		// this is very wrong
+		return new PVector(x,y);
+		
+	}
+	
+	public Angle getAngle()
+	{
+		float rads = (float)Math.atan(-(A/B));
+		if(!Float.isFinite(rads))
+		{
+			// Line is vertical. angle closest to zero for this is 90
+			return Angle.fromDegrees(90);
+		}
+		if(rads > Math.PI)
+		{
+			rads-=Math.PI;
+		}
+		return Angle.fromRadians(rads);
 	}
 
 	public PVector intersect(Line other)

@@ -105,7 +105,41 @@ public class Shape implements HasHandle
 
 	public boolean containsPoint(PVector point)
 	{
-		return false; 
+		// whether a point is in a polygon can be determined by making an arbitrary ray and counting
+		// the locations in which it intersects the polygon.
+		// if this number is even, then the point is not in the polygon.
+		Line test = new Line(point, 0);
+		
+		int hits = 0;
+		
+		for (int i = 0; i<points.size(); i++)
+		{
+			// get two points that make up a line.
+			PVector p1 = points.get(i);
+			PVector p2 = getP2(i);
+
+			Line toHit = new Line(p1, p2);
+			PVector potentialHit = toHit.intersect(test);
+			if(potentialHit.x>=point.x && isHit(potentialHit, p1, p2))
+			{
+				hits++;
+			}
+		}
+
+		return hits%2 == 1;
+		//isHit(hit.hit, p1, p2)
+	}
+	
+	private PVector getP2(int i)
+	{
+		if (i+1 == points.size())
+		{
+			return points.get(0);
+		} 
+		
+		return points.get(i+1);
+		
+		
 	}
 
 	public HitInfo determineHit(Ray ray)
@@ -115,17 +149,10 @@ public class Shape implements HasHandle
 		for (int i = 0; i<points.size(); i++)
 		{
 			// get two points that make up a line.
-			PVector p2;
-			if (i+1 == points.size())
-			{
-				p2 = points.get(0);
-			} 
-			else
-			{
-				p2 = points.get(i+1);
-			}
-
-			hit = getHit(ray, hit, points.get(i), p2);
+			PVector p1 = points.get(i);
+			PVector p2 = getP2(i);
+			
+			hit = getHit(ray, hit, p1, p2);
 		}
 
 		return hit;
@@ -147,7 +174,7 @@ public class Shape implements HasHandle
 		}
 
 		PVector hitP = segment.intersect(ray);
-		HitInfo hit = new HitInfo(hitP, segment);
+		HitInfo hit = new HitInfo(hitP, segment, this);
 
 		// is this hit even valid?
 		if (!isHit(hit.hit, p1, p2))
@@ -211,7 +238,7 @@ public class Shape implements HasHandle
 	{
 
 
-
+		handle.update();
 		// we create a shape and mould it to our desires. glorious.
 		Main.app.noFill();
 		Main.app.stroke(getColor().value);

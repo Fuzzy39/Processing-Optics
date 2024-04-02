@@ -48,70 +48,40 @@ public class Ray
 
 
 
-	public void update(List<HasHandle> objects)
+	public HitInfo update(List<HasHandle> objects)
 	{
-
-		PVector potential = endNoHit();
+		
+		HitInfo toReturn = null;
 		for(HasHandle handle : objects)
 		{
 			if(!(handle instanceof Shape)) continue;
 			Shape s = (Shape)handle;
 			HitInfo info = s.determineHit(this);
-
-			PVector hit = info!=null?info.hit:null;
-
-			if(potential==null || (hit!=null && start.dist(hit) <=start.dist(potential)))
+			
+			if(toReturn == null)
 			{
-				potential = hit;
+				toReturn = info;
+				continue;
 			}
+			
+			if(info == null) continue;
+			if(start.dist(info.hit) <=start.dist(toReturn.hit))
+			{
+				toReturn = info;
+			}	
 		}
-
-		end= potential;
-
-
-
-	}
-
-
-
-	// not needed, but may as well.
-	private PVector endNoHit()
-	{
-
-		Line top = new Line(new PVector(0,0), new PVector(Main.app.width, 0));
-		Line bottom = new Line(new PVector(0,Main.app.height), new PVector(Main.app.width, Main.app.height));
-
-		Line left = new Line(new PVector(0,0), new PVector(0, Main.app.height));
-		Line right = new Line(new PVector(Main.app.width,0), new PVector(Main.app.width, Main.app.height));
-		Line[] lines = {top, bottom, left, right};
-
-
-		PVector current = null;
-		for(Line line : lines)
+		
+		if(toReturn == null)
 		{
-			PVector next = line.intersect(this);
-			if(current == null)
-			{
-				current = next;
-				continue;
-			}
-
-			if(next==null)
-			{
-				continue;
-			}
-
-			if(start.dist(next)<start.dist(current))
-			{
-				current = next;
-			}
+			throw new NullPointerException("Ray at "+start+", angle "+angle.getDegrees()+" degrees intersected no object.");
 		}
-
-
-		return current;
-
+		
+		end = toReturn.hit;
+		return toReturn;
 
 	}
+
+
 
 	public void draw()
 	{

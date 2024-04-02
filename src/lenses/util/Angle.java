@@ -7,6 +7,10 @@ public class Angle
 
 	private Angle() {}
 
+	public String toString()
+	{
+		return getDegrees()+" Degrees";
+	}
 	public float getRadians()
 	{
 		return rad;
@@ -30,6 +34,11 @@ public class Angle
 	{
 		setRadians((degrees*(float)Math.PI)/180);
 
+	}
+	
+	public Angle mult(float times)
+	{
+		return Angle.fromRadians(this.rad*times);
 	}
 
 	public Angle add(Angle other)

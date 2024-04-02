@@ -12,19 +12,19 @@ public class LightSource implements HasHandle
 
 	private PVector position;
 	private Handle handle;
-	private List<Ray> beams;
+	private List<LightBeam> beams;
 
 	public LightSource(PVector pos, int beams, Angle spread)
 	{
 		position = pos;
 		float ang =0; // we specifically want integer division here...
 
-		this.beams = new ArrayList<Ray>();
+		this.beams = new ArrayList<LightBeam>();
 
 		for(int i= 0; i<beams; i++)
 		{
 			Color c = getColor();
-			this.beams.add(new Ray(position, Angle.fromDegrees(ang),new Color(c.red(),c.green(),c.blue(),200)));
+			this.beams.add(new LightBeam(position, Angle.fromDegrees(ang),new Color(c.red(),c.green(),c.blue(),100)));
 			ang += spread.getDegrees()/beams;
 
 		}
@@ -44,18 +44,18 @@ public class LightSource implements HasHandle
 	public void updatePosition(PVector newHandlePos)
 	{
 		position = newHandlePos;
-		for(Ray ray : beams)
+		for(LightBeam beam: beams)
 		{
-			ray.setStart(position);
+			beam.setStart(position);
 		}
 	}
 
 
 	public void nudgeAngle(Angle ang)
 	{
-		for(Ray ray: beams)
+		for(LightBeam beam: beams)
 		{
-			ray.setAngle(ray.getAngle().add(ang));
+			beam.setAngle(beam.getAngle().add(ang));
 		}
 	}
 
@@ -68,7 +68,7 @@ public class LightSource implements HasHandle
 
 	public void update(List<HasHandle> objects)
 	{
-		for(Ray ray : beams)
+		for(LightBeam ray : beams)
 		{
 			ray.update( objects);
 		}
@@ -76,8 +76,8 @@ public class LightSource implements HasHandle
 
 	public void draw()
 	{
-
-		for(Ray ray : beams)
+		handle.update();
+		for(LightBeam ray : beams)
 		{
 			ray.draw();
 		}

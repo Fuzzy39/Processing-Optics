@@ -35,9 +35,9 @@ public class Handle
 		return dragged;
 	}
 
-
-	public void draw()
+	public void update()
 	{
+
 		if(locked) return;
 		if(dragged)
 		{
@@ -52,6 +52,12 @@ public class Handle
 
 			parent.updatePosition(new PVector(mx, my));
 		}
+	}
+
+	public void draw()
+	{
+		if(locked) return;
+		
 
 		// handle
 		Main.app.strokeWeight(size);
